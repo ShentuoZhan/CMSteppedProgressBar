@@ -11,7 +11,12 @@
 @property (nonatomic, assign) BOOL isAnimated;
 @property (nonatomic, strong) NSArray* views;
 @property (nonatomic, assign) NSInteger futureStep;
+@property (nonatomic, assign) NSInteger futurePosition;
 @property (nonatomic, strong) NSArray* filledViews;
+@property (nonatomic, strong) NSArray* lineViews;
+@property (nonatomic, strong) NSArray* lineFilledViews;
+@property (nonatomic, strong) UIView *currentLineView;
+
 @end
 
 @implementation CMSteppedProgressBar
@@ -27,6 +32,7 @@
     self.animOption = UIViewAnimationOptionCurveEaseIn;
     self.isAnimated = NO;
     self.futureStep = -1;
+    self.futurePosition = -1;
 }
 
 - (id)initWithCoder:(NSCoder *)aDecoder {
@@ -49,6 +55,7 @@
     _numberOfSteps = nbSteps;
     [self prepareViews];
     [self setCurrentStep:0];
+    [self setCurrentPosition:0];
 }
 
 - (void)animateViewFromIndex:(NSUInteger)index toIndex:(NSUInteger)endIndex andInterval:(CGFloat)interval {
@@ -58,6 +65,35 @@
             NSInteger step = self.futureStep;
             self.futureStep = -1;
             [self setCurrentStep:step];
+        }
+        [self animateViewFromPosition:0 toPosition:_currentPosition andInterval:self.animDuration/10.0];
+        if (endIndex==(self.numberOfSteps-1)*2) {
+            NSMutableArray *imagesArray = [[NSMutableArray alloc]init];
+            for (int i=1; i<7; i++) {
+                NSString *imageName = [NSString stringWithFormat:@"glowing_0%d",i];
+                UIImage *image = [UIImage imageNamed:imageName];
+                [imagesArray addObject:image];
+            }
+            UIImageView *animationImage = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.dotsWidth+10, self.dotsWidth+10)];
+            animationImage.animationImages = imagesArray;
+            animationImage.animationDuration = 0.5f;
+            animationImage.animationRepeatCount = 0;
+            
+            UIView* filledDot = [self.filledViews objectAtIndex:endIndex];
+            UIView* notFilledDot = [self.views objectAtIndex:endIndex];
+            
+            [[notFilledDot viewWithTag:23]setHidden:YES];
+            [filledDot setFrame:CGRectMake(filledDot.frame.origin.x-5, filledDot.frame.origin.y-5, self.dotsWidth+10, self.dotsWidth+10)];
+            filledDot.backgroundColor = [UIColor clearColor];
+            filledDot.layer.cornerRadius = (self.dotsWidth+10)/2;
+            
+            
+            UIImageView *goalStar = [[UIImageView alloc] initWithFrame:CGRectMake(12.5, 12.5, self.dotsWidth-15,self.dotsWidth-15)];
+            [goalStar setImage:[UIImage imageNamed:@"goal_star"]];
+            
+            [filledDot addSubview:animationImage];
+            [filledDot addSubview:goalStar];
+            [animationImage startAnimating];
         }
         return;
     }
@@ -69,6 +105,27 @@
         [filledDot setFrame:CGRectMake(filledDot.frame.origin.x, filledDot.frame.origin.y, notFilledDot.frame.size.width, filledDot.frame.size.height)];
     }completion:^(BOOL finished){
         [self animateViewFromIndex:index+1 toIndex:endIndex andInterval:interval];
+    }];
+}
+
+- (void)animateViewFromPosition:(NSUInteger)position toPosition:(NSUInteger)endPosition andInterval:(CGFloat)interval {
+    if (position >= endPosition) {
+        self.isAnimated = NO;
+        if (self.futurePosition != -1) {
+            NSInteger pos = self.futurePosition;
+            self.futurePosition = -1;
+            [self setCurrentPosition:pos];
+        }
+        return;
+    }
+    [UIView animateWithDuration:interval delay:0.f options:self.animOption animations:^{
+        self.isAnimated = YES;
+        UIView* filledLine = [self.lineFilledViews objectAtIndex:position];
+        UIView* notFilledLine = [self.lineViews objectAtIndex:position];
+        
+        [filledLine setFrame:CGRectMake(filledLine.frame.origin.x, filledLine.frame.origin.y, notFilledLine.frame.size.width, filledLine.frame.size.height)];
+    }completion:^(BOOL finished){
+        [self animateViewFromPosition:position+1 toPosition:endPosition andInterval:interval];
     }];
 }
 
@@ -91,7 +148,8 @@
     }];
 }
 
-- (void)setCurrentStep:(NSUInteger)currentStep {
+- (void)setCurrentStep:(NSUInteger)currentStep andCurrentPosition:(NSUInteger)currentPosition{
+    _currentPosition = currentPosition;
     if (self.isAnimated == NO) {
         if (currentStep < self.numberOfSteps) {
             if (currentStep != _currentStep) {
@@ -99,9 +157,22 @@
                 {
                     if (currentStep == 0) {
                         [[self.views objectAtIndex:0] setBackgroundColor:self.tintColor];
+                        self.currentLineView = [self.filledViews objectAtIndex:(currentStep*2+1)%9];
+                        UIView *lineView = [self.views objectAtIndex:(currentStep*2+1)%9];
+                        [self.currentLineView setFrame:CGRectMake(self.currentLineView.frame.origin.x, self.currentLineView.frame.origin.y, lineView.frame.size.width, self.currentLineView.frame.size.height)];
+                        if (currentStep!=self.numberOfSteps-1) {
+                            [self prepareLineViews];
+                            [self animateViewFromPosition:0 toPosition:currentPosition andInterval:self.animDuration/10.0];
+                        }
                     } else {
                         NSUInteger diff = currentStep - _currentStep;
                         [self animateViewFromIndex:_currentStep*2 toIndex:(_currentStep*2)+diff*2 andInterval:self.animDuration/(CGFloat)diff];
+                        self.currentLineView = [self.filledViews objectAtIndex:(currentStep*2+1)%9];
+                        UIView *lineView = [self.views objectAtIndex:(currentStep*2+1)%9];
+                        [self.currentLineView setFrame:CGRectMake(self.currentLineView.frame.origin.x, self.currentLineView.frame.origin.y, lineView.frame.size.width, self.currentLineView.frame.size.height)];
+                        if (currentStep!=self.numberOfSteps-1) {
+                            [self prepareLineViews];
+                        }
                     }
                 }
                 else {
@@ -111,6 +182,14 @@
                         NSUInteger diff = _currentStep - currentStep;
                         [self animateViewInvertFromIndex:_currentStep*2 toIndex:(_currentStep*2)-diff*2 andInterval:self.animDuration/(CGFloat)diff];
                     }
+                }
+            }else{
+                self.currentLineView = [self.filledViews objectAtIndex:(currentStep*2+1)%9];
+                UIView *lineView = [self.views objectAtIndex:(currentStep*2+1)%9];
+                [self.currentLineView setFrame:CGRectMake(self.currentLineView.frame.origin.x, self.currentLineView.frame.origin.y, lineView.frame.size.width, self.currentLineView.frame.size.height)];
+                if (currentStep!=self.numberOfSteps-1) {
+                    [self prepareLineViews];
+                    [self animateViewFromPosition:0 toPosition:currentPosition andInterval:self.animDuration/10.0];
                 }
             }
             _currentStep = currentStep;
@@ -158,6 +237,21 @@
         filledround.layer.masksToBounds = NO;
         filledround.userInteractionEnabled = NO;
         
+        if ((i+1)<self.numberOfSteps && i>0) {
+            UILabel *mileStoneNumber = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.dotsWidth, self.dotsWidth)];
+            mileStoneNumber.textColor = [UIColor blackColor];
+            mileStoneNumber.font = [mileStoneNumber.font fontWithSize:18];
+            mileStoneNumber.text = [NSString stringWithFormat:@"%d",i+1];
+            mileStoneNumber.textAlignment = NSTextAlignmentCenter;
+            [round addSubview:mileStoneNumber];
+        }else if(i!=0)
+        {
+            UIImageView *goalStar = [[UIImageView alloc] initWithFrame:CGRectMake(2, 2, (self.dotsWidth-4), (self.dotsWidth-4))];
+            goalStar.tag = 23;
+            [goalStar setImage:[UIImage imageNamed:@"goal_star"]];
+            [round addSubview:goalStar];
+        }
+        
         UITapGestureRecognizer *recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(stepBtnClicked:)];
         [round addGestureRecognizer:recognizer];
         
@@ -179,6 +273,26 @@
     }
     self.views = aviews;
     self.filledViews = afilledViews;
+}
+
+- (void) prepareLineViews {
+    NSMutableArray* lviews = [[NSMutableArray alloc] init];
+    NSMutableArray* lfilledViews = [[NSMutableArray alloc] init];
+    
+    CGFloat lineWidth = _currentLineView.frame.size.width/10;
+    for (int i = 0; i < 10; i++) {
+        UIView* line = [[UIView alloc] initWithFrame:CGRectMake(lineWidth*i, 0, lineWidth, self.linesHeight)];
+        line.backgroundColor = self.barColor;
+        [lviews addObject:line];
+        
+        UIView* filledline = [[UIView alloc] initWithFrame:CGRectMake(lineWidth*i, 0, 0, self.linesHeight)];
+        filledline.backgroundColor = self.tintColor;
+        [lfilledViews addObject:filledline];
+        [_currentLineView addSubview:line];
+        [_currentLineView addSubview:filledline];
+    }
+    self.lineViews = lviews;
+    self.lineFilledViews = lfilledViews;
 }
 
 

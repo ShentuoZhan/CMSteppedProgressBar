@@ -21,6 +21,9 @@
 /// set manually the currentStep or use stepNext/stepPrev
 @property (nonatomic) NSUInteger currentStep;
 
+/// set manually the current position between currentStep and nextStep [0, 100]
+@property (nonatomic) NSUInteger currentPosition;
+
 /// change the line height between the dots, default is 5
 @property (nonatomic) CGFloat linesHeight;
 
@@ -43,4 +46,5 @@
 
 - (void)nextStep;
 - (void)prevStep;
+- (void)setCurrentStep:(NSUInteger)currentStep andCurrentPosition:(NSUInteger)currentPosition;
 @end
