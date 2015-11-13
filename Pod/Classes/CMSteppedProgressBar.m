@@ -89,7 +89,8 @@
             
             
             UIImageView *goalStar = [[UIImageView alloc] initWithFrame:CGRectMake(12.5, 12.5, self.dotsWidth-15,self.dotsWidth-15)];
-            [goalStar setImage:[UIImage imageNamed:@"goal_star"]];
+            [goalStar setImage:[UIImage imageNamed:@"goal_star_reached"]];
+            goalStar.backgroundColor = [UIColor redColor];
             
             [filledDot addSubview:animationImage];
             [filledDot addSubview:goalStar];
