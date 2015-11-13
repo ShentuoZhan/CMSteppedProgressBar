@@ -88,10 +88,11 @@
             filledDot.layer.cornerRadius = (self.dotsWidth+10)/2;
             
             
-            UIImageView *goalStar = [[UIImageView alloc] initWithFrame:CGRectMake(12.5, 12.5, self.dotsWidth-15,self.dotsWidth-15)];
+            UIImageView *goalStar = [[UIImageView alloc] initWithFrame:CGRectMake(7.5, 7.5, self.dotsWidth-5,self.dotsWidth-5)];
             [goalStar setImage:[UIImage imageNamed:@"goal_star_reached"]];
             goalStar.backgroundColor = [UIColor redColor];
             
+            goalStar.layer.cornerRadius = (self.dotsWidth-5)/2;
             [filledDot addSubview:animationImage];
             [filledDot addSubview:goalStar];
             [animationImage startAnimating];
