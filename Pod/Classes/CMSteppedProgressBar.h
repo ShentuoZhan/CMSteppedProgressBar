@@ -18,6 +18,9 @@
 /// set numberOfSteps in last because it will create all views, so if you want a custom design customize before setting the number of steps
 @property (nonatomic) NSUInteger numberOfSteps;
 
+///set munaully the different distances of milestones
+@property (nonatomic, strong) NSMutableArray *mileStones;
+
 /// set manually the currentStep or use stepNext/stepPrev
 @property (nonatomic) NSUInteger currentStep;
 
@@ -46,5 +49,6 @@
 
 - (void)nextStep;
 - (void)prevStep;
+- (void)setNumberOfSteps:(NSUInteger)nbSteps withMileStones:(NSMutableArray*)mileStones;
 - (void)setCurrentStep:(NSUInteger)currentStep andCurrentPosition:(NSUInteger)currentPosition;
 @end

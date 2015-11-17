@@ -51,8 +51,9 @@
     return self;
 }
 
-- (void)setNumberOfSteps:(NSUInteger)nbSteps {
+- (void)setNumberOfSteps:(NSUInteger)nbSteps withMileStones:(NSMutableArray*)mileStones{
     _numberOfSteps = nbSteps;
+    _mileStones = mileStones;
     [self prepareViews];
     [self setCurrentStep:0];
     [self setCurrentPosition:0];
@@ -220,12 +221,26 @@
 }
 
 - (void) prepareViews {
+
     NSMutableArray* aviews = [[NSMutableArray alloc] init];
     NSMutableArray* afilledViews = [[NSMutableArray alloc] init];
-    
-    CGFloat padding = (self.frame.size.width-(self.numberOfSteps*self.dotsWidth))/(self.numberOfSteps+1);
+    NSMutableArray* paddings = [[NSMutableArray alloc] init];
+    CGFloat paddingTotal = self.frame.size.width-(self.numberOfSteps*self.dotsWidth);
+    CGFloat totalValue = 0;
+    for (int i = 0; i < self.numberOfSteps-1; i++) {
+        totalValue += [[self.mileStones objectAtIndex:i] doubleValue];
+    }
+    for (int i = 0; i < self.numberOfSteps-1; i++) {
+        CGFloat padding = [[self.mileStones objectAtIndex:i] doubleValue]*paddingTotal/totalValue;
+        [paddings addObject:[NSNumber numberWithDouble:padding]];
+    }
+
+    CGFloat padding = 0;
     for (int i = 0; i < self.numberOfSteps; i++) {
-        UIView *round = [[UIView alloc] initWithFrame:CGRectMake((i*self.dotsWidth)+((i+1)*padding), self.frame.size.height/2-self.dotsWidth/2, self.dotsWidth, self.dotsWidth)];
+        if (i > 0) {
+         padding += [[paddings objectAtIndex:i-1] doubleValue];
+        }
+        UIView *round = [[UIView alloc] initWithFrame:CGRectMake((i*self.dotsWidth)+padding, self.frame.size.height/2-self.dotsWidth/2, self.dotsWidth, self.dotsWidth)];
         round.tag = i;
         round.layer.cornerRadius = self.dotsWidth/2;
         if (i == 0)
@@ -233,7 +248,7 @@
         else
             round.backgroundColor = self.barColor;
         
-        UIView* filledround = [[UIView alloc] initWithFrame:CGRectMake((i*self.dotsWidth)+((i+1)*padding), self.frame.size.height/2-self.dotsWidth/2, 0, self.dotsWidth)];
+        UIView* filledround = [[UIView alloc] initWithFrame:CGRectMake((i*self.dotsWidth)+padding, self.frame.size.height/2-self.dotsWidth/2, 0, self.dotsWidth)];
         filledround.backgroundColor = self.tintColor;
         filledround.layer.cornerRadius = self.dotsWidth/2;
         filledround.layer.masksToBounds = NO;
@@ -260,7 +275,8 @@
         [afilledViews addObject:filledround];
         [aviews addObject:round];
         if (i < self.numberOfSteps-1) {
-            UIView* line = [[UIView alloc] initWithFrame:CGRectMake((round.frame.origin.x+round.frame.size.width)-1, self.frame.size.height/2-self.linesHeight/2, padding+2, self.linesHeight)];
+            CGFloat lineWidth = [[paddings objectAtIndex:i] doubleValue];
+            UIView* line = [[UIView alloc] initWithFrame:CGRectMake((round.frame.origin.x+round.frame.size.width)-1, self.frame.size.height/2-self.linesHeight/2, lineWidth+2, self.linesHeight)];
             line.backgroundColor = self.barColor;
             [self addSubview:line];
             [aviews addObject:line];
