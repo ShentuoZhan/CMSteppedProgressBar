@@ -160,8 +160,8 @@
                 {
                     if (currentStep == 0) {
                         [[self.views objectAtIndex:0] setBackgroundColor:self.tintColor];
-                        self.currentLineView = [self.filledViews objectAtIndex:(currentStep*2+1)%9];
-                        UIView *lineView = [self.views objectAtIndex:(currentStep*2+1)%9];
+                        self.currentLineView = [self.filledViews objectAtIndex:(currentStep*2+1)%self.filledViews.count];
+                        UIView *lineView = [self.views objectAtIndex:(currentStep*2+1)%self.views.count];
                         [self.currentLineView setFrame:CGRectMake(self.currentLineView.frame.origin.x, self.currentLineView.frame.origin.y, lineView.frame.size.width, self.currentLineView.frame.size.height)];
                         if (currentStep!=self.numberOfSteps-1) {
                             [self prepareLineViews];
@@ -170,8 +170,8 @@
                     } else {
                         NSUInteger diff = currentStep - _currentStep;
                         [self animateViewFromIndex:_currentStep*2 toIndex:(_currentStep*2)+diff*2 andInterval:self.animDuration/(CGFloat)diff];
-                        self.currentLineView = [self.filledViews objectAtIndex:(currentStep*2+1)%9];
-                        UIView *lineView = [self.views objectAtIndex:(currentStep*2+1)%9];
+                        self.currentLineView = [self.filledViews objectAtIndex:(currentStep*2+1)%self.filledViews.count];
+                        UIView *lineView = [self.views objectAtIndex:(currentStep*2+1)%self.views.count];
                         [self.currentLineView setFrame:CGRectMake(self.currentLineView.frame.origin.x, self.currentLineView.frame.origin.y, lineView.frame.size.width, self.currentLineView.frame.size.height)];
                         if (currentStep!=self.numberOfSteps-1) {
                             [self prepareLineViews];
