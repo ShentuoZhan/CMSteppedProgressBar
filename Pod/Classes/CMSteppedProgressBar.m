@@ -2,6 +2,7 @@
 //  CMSteppedProgressBar.m
 //
 //  Created by Mycose on 12/03/2015.
+//  Last Modified by Shentuo Zhan on 15/12/2015.
 //  Copyright (c) 2015 Mycose. All rights reserved.
 //
 
@@ -16,6 +17,7 @@
 @property (nonatomic, strong) NSArray* lineViews;
 @property (nonatomic, strong) NSArray* lineFilledViews;
 @property (nonatomic, strong) UIView *currentLineView;
+@property (nonatomic, strong) UIImageView *goalAnimation;
 
 @end
 
@@ -55,11 +57,19 @@
     _numberOfSteps = nbSteps;
     _mileStones = mileStones;
     [self prepareViews];
+    [self resetGoalAnimation];
     [self setCurrentStep:0];
     [self setCurrentPosition:0];
 }
 
+- (void)resetGoalAnimation
+{
+    _goalAnimation.animationImages = nil;
+    [_goalAnimation stopAnimating];
+    [_goalAnimation removeFromSuperview];
+}
 - (void)animateViewFromIndex:(NSUInteger)index toIndex:(NSUInteger)endIndex andInterval:(CGFloat)interval {
+    
     if (index > endIndex) {
         self.isAnimated = NO;
         if (self.futureStep != -1) {
@@ -75,10 +85,10 @@
                 UIImage *image = [UIImage imageNamed:imageName];
                 [imagesArray addObject:image];
             }
-            UIImageView *animationImage = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.dotsWidth+10, self.dotsWidth+10)];
-            animationImage.animationImages = imagesArray;
-            animationImage.animationDuration = 0.5f;
-            animationImage.animationRepeatCount = 0;
+            _goalAnimation = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.dotsWidth+10, self.dotsWidth+10)];
+            _goalAnimation.animationImages = imagesArray;
+            _goalAnimation.animationDuration = 0.5f;
+            _goalAnimation.animationRepeatCount = 0;
             
             UIView* filledDot = [self.filledViews objectAtIndex:endIndex];
             UIView* notFilledDot = [self.views objectAtIndex:endIndex];
@@ -94,9 +104,11 @@
             goalStar.backgroundColor = [UIColor redColor];
             
             goalStar.layer.cornerRadius = (self.dotsWidth-5)/2;
-            [filledDot addSubview:animationImage];
+            [filledDot addSubview:_goalAnimation];
             [filledDot addSubview:goalStar];
-            [animationImage startAnimating];
+        }
+        if (endIndex==(self.numberOfSteps-1)*2 && index == endIndex + 1) {
+            [_goalAnimation startAnimating];
         }
         return;
     }
