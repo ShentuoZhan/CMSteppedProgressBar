@@ -270,7 +270,7 @@
             UILabel *mileStoneNumber = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.dotsWidth, self.dotsWidth)];
             mileStoneNumber.textColor = [UIColor blackColor];
             mileStoneNumber.font = [mileStoneNumber.font fontWithSize:18];
-            mileStoneNumber.text = [NSString stringWithFormat:@"%d",i+1];
+            mileStoneNumber.text = [NSString stringWithFormat:@"%d",i];
             mileStoneNumber.textAlignment = NSTextAlignmentCenter;
             [round addSubview:mileStoneNumber];
         }else if(i!=0)
