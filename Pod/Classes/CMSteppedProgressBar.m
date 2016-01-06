@@ -2,7 +2,7 @@
 //  CMSteppedProgressBar.m
 //
 //  Created by Mycose on 12/03/2015.
-//  Last Modified by Shentuo Zhan on 15/12/2015.
+//  Last Modified by Shentuo Zhan on 06/01/2016.
 //  Copyright (c) 2015 Mycose. All rights reserved.
 //
 
@@ -112,13 +112,17 @@
         }
         return;
     }
+    UIView* filledDot = [self.filledViews objectAtIndex:index];
     [UIView animateWithDuration:interval delay:0.f options:self.animOption animations:^{
         self.isAnimated = YES;
-        UIView* filledDot = [self.filledViews objectAtIndex:index];
         UIView* notFilledDot = [self.views objectAtIndex:index];
         
         [filledDot setFrame:CGRectMake(filledDot.frame.origin.x, filledDot.frame.origin.y, notFilledDot.frame.size.width, filledDot.frame.size.height)];
+        
     }completion:^(BOOL finished){
+        UIImageView *progressCompleted = [[UIImageView alloc] initWithFrame:CGRectMake(3, 3, self.dotsWidth-6,self.dotsWidth-6)];
+        [progressCompleted setImage:[UIImage imageNamed:@"progress_completed_tick"]];
+        [filledDot addSubview:progressCompleted];
         [self animateViewFromIndex:index+1 toIndex:endIndex andInterval:interval];
     }];
 }
