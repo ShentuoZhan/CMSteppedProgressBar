@@ -259,8 +259,12 @@
         UIView *round = [[UIView alloc] initWithFrame:CGRectMake((i*self.dotsWidth)+padding, self.frame.size.height/2-self.dotsWidth/2, self.dotsWidth, self.dotsWidth)];
         round.tag = i;
         round.layer.cornerRadius = self.dotsWidth/2;
-        if (i == 0)
+        if (i == 0){
             round.backgroundColor = self.tintColor;
+            UIImageView *progressCompleted = [[UIImageView alloc] initWithFrame:CGRectMake(3, 3, self.dotsWidth-6,self.dotsWidth-6)];
+            [progressCompleted setImage:[UIImage imageNamed:@"progress_completed_tick"]];
+            [round addSubview:progressCompleted];
+        }
         else
             round.backgroundColor = self.barColor;
         
